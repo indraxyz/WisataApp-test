@@ -30,9 +30,12 @@ body {
 }
 
 @layer components {
-  /* .foto-profile {
-    @apply w-40 md:w-full h-auto rounded-xl self-center;
-  } */
+  .logo {
+    @apply hidden sm:w-40 h-auto sm:block;
+  }
+  .img-property {
+    @apply h-auto w-24 sm:w-36 rounded-full;
+  }
 }
 
 /* our new class  */
