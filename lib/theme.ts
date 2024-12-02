@@ -6,6 +6,18 @@ const theme = createTheme({
     fontFamily: "var(--font-roboto)",
   },
   cssVariables: true,
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+        },
+      },
+    },
+  },
 });
 
 export default theme;
