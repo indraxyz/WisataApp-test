@@ -1,0 +1,12 @@
+lib:
+next.js
+tailwind
+mui
+
+NEXTJS :
+components
+routing : middleware
+data fetching
+rendering: composition pattern
+optimizing: image, font, meta data, lazy loading, metadata, seo 
+deploying
