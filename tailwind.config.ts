@@ -34,5 +34,4 @@ export default {
   corePlugins: {
     preflight: false,
   },
-  important: "#__next",
 } satisfies Config;
