@@ -8,8 +8,19 @@ import {
   DialogContent,
   TextField,
   InputAdornment,
-  Input,
+  // Input,
   Autocomplete,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Link,
+  FormHelperText,
+  Snackbar,
+  Alert,
+  AlertTitle,
+  ImageList,
+  ImageListItem,
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -36,10 +47,66 @@ import AppleIcon from "@mui/icons-material/Apple";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import ClearIcon from "@mui/icons-material/Clear";
+// import ClearIcon from "@mui/icons-material/Clear";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 import Logo from "../public/logo.png";
 import ImgSquare from "../public/img-square.jpg";
+
+const dataImageList = [
+  {
+    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
+    title: "Breakfast",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
+    title: "Burger",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
+    title: "Camera",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
+    title: "Coffee",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
+    title: "Hats",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
+    title: "Honey",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
+    title: "Basketball",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
+    title: "Fern",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
+    title: "Mushrooms",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
+    title: "Tomato basil",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
+    title: "Sea star",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
+    title: "Bike",
+  },
+];
+
+const today = new Date();
+const nextDay = new Date().setDate(today.getDate() + 1);
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -73,17 +140,18 @@ export default function Home() {
   const [dialogSignin, setDialogSignin] = useState(false);
   const [dialogSearchBar, setDialogSearchBar] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [snackbarChildren, setSnackbarChildren] = useState(false);
+
+  // form search bar
+  const [guestRoomField, setGuestRoomField] = useState(1);
+  const [roomField, setRoomField] = useState(1);
+  const [checkIn, setCheckIn] = useState(today.toISOString().slice(0, 10));
+  const [checkOut, setCheckOut] = useState(
+    new Date(nextDay).toISOString().slice(0, 10)
+  );
 
   const theme = useTheme();
   const smallUP = useMediaQuery(theme.breakpoints.up("sm"));
-
-  // MODAL sign in
-  // const handleOpen = () => setOpen(true);
-  const _tes = () => {
-    console.log("tes function");
-  };
-
-  // MODAL search
 
   return (
     <Container maxWidth="lg" disableGutters className="px-2 md:px-16">
@@ -224,10 +292,42 @@ export default function Home() {
         Item One
       </TabPanel>
       <TabPanel value={selectedTab} index={1}>
-        Item Two
+        {/* PHOTOS TAB */}
       </TabPanel>
       <TabPanel value={selectedTab} index={2}>
-        Item Three
+        {/* INFO TAB: 
+        about (desc, language), 
+        policies(check in, check out, additional information, others), 
+        important information(optional charge)*/}
+        <Box component={"div"}>
+          <Typography className="text-xl font-medium">
+            About the property
+          </Typography>
+          <Typography>....</Typography>
+          <Typography className="text-lg">Languages</Typography>
+          <Typography>....</Typography>
+          <br />
+          <br />
+
+          <Typography className="text-xl font-medium">Policies</Typography>
+          <Typography className="text-lg">Check in - check out</Typography>
+          <Typography>....</Typography>
+          <Typography className="text-lg">
+            Additional check-in information
+          </Typography>
+          <Typography>....</Typography>
+          <Typography className="text-lg">others</Typography>
+          <Typography>....</Typography>
+          <br />
+          <br />
+
+          <Typography className="text-xl font-medium">
+            Important information
+          </Typography>
+          <Typography className="text-lg">optional charges</Typography>
+          <Typography>....</Typography>
+          <br />
+        </Box>
       </TabPanel>
 
       {/* DIALOG SIGN IN */}
@@ -324,16 +424,26 @@ export default function Home() {
             <Grid container spacing={{ xs: 2, sm: 4 }}>
               <Grid size={{ xs: 4, sm: 2 }}>
                 <TextField
+                  className="sm:w-[182px] w-[395px]"
+                  // sx={{ width: 182 }}
                   fullWidth
-                  label="Where are you going ?"
+                  label="Check in"
                   variant="standard"
+                  type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
                 />
               </Grid>
               <Grid size={{ xs: 4, sm: 2 }}>
                 <TextField
+                  // sx={{ width: 182 }}
+                  className="sm:w-[182px]"
                   fullWidth
-                  label="Where are you going ?"
+                  label="Check Out"
                   variant="standard"
+                  type="date"
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -341,10 +451,87 @@ export default function Home() {
             {/* guest room */}
             <Grid container spacing={{ xs: 2, sm: 4 }}>
               <Grid size={{ xs: 4, sm: 2 }}>
-                <TextField fullWidth label="Guest ?" variant="standard" />
+                <FormControl fullWidth variant="standard">
+                  <InputLabel id="demo-simple-select-label">
+                    Guests/Room
+                  </InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    // defaultValue={1}
+                    value={guestRoomField}
+                    label="Age"
+                    onChange={(e) => {
+                      setGuestRoomField(Number(e.target.value));
+                    }}
+                  >
+                    <MenuItem value={1}>Single Room</MenuItem>
+                    <MenuItem value={2}>Double Room</MenuItem>
+                    <MenuItem value={3}>Triple Room</MenuItem>
+                    <MenuItem value={4}>Group of 4</MenuItem>
+                    <MenuItem value={5}>Group of 5</MenuItem>
+                    <MenuItem value={6}>Group of 6</MenuItem>
+                    <MenuItem value={7}>Group of 7</MenuItem>
+                    <MenuItem value={8}>Group of 8</MenuItem>
+                    <MenuItem value={9}>Group of 9</MenuItem>
+                    <MenuItem value={10}>Group of 10</MenuItem>
+                  </Select>
+                  <FormHelperText>
+                    <Link
+                      component={"button"}
+                      underline="hover"
+                      // variant="body2"
+                      color="textSecondary"
+                      onClick={() => setSnackbarChildren(true)}
+                    >
+                      🧒 How about children ?
+                    </Link>
+                  </FormHelperText>
+                  {/* <Link
+                    component={"button"}
+                    variant="body2"
+                    onclick={() => console.log("info children")}
+                  >
+                    How about children ?
+                  </Link> */}
+                </FormControl>
               </Grid>
               <Grid size={{ xs: 4, sm: 2 }}>
-                <TextField fullWidth label="Room ?" variant="standard" />
+                <TextField
+                  fullWidth
+                  // defaultValue={1}
+                  value={roomField}
+                  variant="standard"
+                  label="Rooms"
+                  placeholder=""
+                  type="number"
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconButton
+                            onClick={() =>
+                              roomField < 10 && setRoomField(roomField + 1)
+                            }
+                          >
+                            <AddIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() =>
+                              roomField > 1 && setRoomField(roomField - 1)
+                            }
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
               </Grid>
             </Grid>
             {/* submit */}
@@ -356,6 +543,25 @@ export default function Home() {
           </Grid>
         </DialogContent>
       </Dialog>
+
+      {/* children info */}
+      <Snackbar
+        open={snackbarChildren}
+        onClose={() => setSnackbarChildren(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarChildren(false)}
+          severity="info"
+          variant="standard"
+          sx={{ width: "100%" }}
+          className="sm:mr-4"
+        >
+          <AlertTitle>🧒 How about children ? </AlertTitle>
+          Most hotels permit children to use existing bedding when sharing the
+          room with parent or guardian. Rules may vary, be sure to check each
+          hotel occupancy policy.
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

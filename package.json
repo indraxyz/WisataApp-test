@@ -16,6 +16,8 @@
     "@mui/lab": "^6.0.0-beta.17",
     "@mui/material": "latest",
     "@mui/material-nextjs": "latest",
+    "@mui/x-date-pickers": "^7.23.0",
+    "dayjs": "^1.11.13",
     "next": "^15.0.3",
     "react": "latest",
     "react-dom": "latest"
