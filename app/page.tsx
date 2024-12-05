@@ -8,7 +8,6 @@ import {
   DialogContent,
   TextField,
   InputAdornment,
-  // Input,
   Autocomplete,
   FormControl,
   InputLabel,
@@ -19,7 +18,9 @@ import {
   Snackbar,
   Alert,
   AlertTitle,
+  CircularProgress,
 } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
@@ -45,245 +46,28 @@ import AppleIcon from "@mui/icons-material/Apple";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-// import ClearIcon from "@mui/icons-material/Clear";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import DoorBackIcon from "@mui/icons-material/DoorBack";
 
 import Logo from "../public/logo.png";
 import ImgSquare from "../public/img-square.jpg";
-import ImgLandscape from "../public/img-landscape.png";
+// import ImgLandscape from "../public/img-landscape.png";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
-const dataImageList = [
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-];
+import { content, offer } from "../lib/mock-data";
 
 const today = new Date();
 const nextDay = new Date().setDate(today.getDate() + 1);
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <>{children}</>}
-    </div>
-  );
-}
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
 
 export default function Home() {
   // initial
   const [dialogSignin, setDialogSignin] = useState(false);
   const [dialogSearchBar, setDialogSearchBar] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(1);
   const [snackbarChildren, setSnackbarChildren] = useState(false);
 
   // form search bar
@@ -294,7 +78,13 @@ export default function Home() {
     new Date(nextDay).toISOString().slice(0, 10)
   );
 
-  const [photos, setPhotos] = useState(dataImageList.slice(0, 15));
+  // rest data
+  const [contentData, setContentData] = useState(content);
+  const [photos, setPhotos] = useState(contentData.image.slice(0, 15));
+  const [language, setLanguage] = useState(
+    contentData.general_info.spoken_languages
+  );
+  let key: keyof typeof language;
 
   const theme = useTheme();
   const smallUP = useMediaQuery(theme.breakpoints.up("sm"));
@@ -325,11 +115,11 @@ export default function Home() {
           <Button
             variant="contained"
             fullWidth
-            sx={{ bgcolor: grey[100], color: "black" }}
+            sx={{ bgcolor: grey[100], color: grey[600] }}
             onClick={() => setDialogSearchBar(true)}
             startIcon={<SearchIcon />}
           >
-            Search
+            Choose your beautiful trip 🌈
           </Button>
         </Grid>
         <Grid
@@ -360,45 +150,85 @@ export default function Home() {
 
       {/* selected place OR property
        */}
+      {!smallUP && (
+        <Box
+          component={"div"}
+          sx={{ display: "flex", alignItems: "center" }}
+          className="ml-2 mt-4"
+        >
+          <Typography className="font-bold text-base sm:text-xl ">
+            {contentData.name}
+          </Typography>
+          {/* star_rating */}
+          <Box className="mx-1 text-orange-500">
+            {new Array(contentData.catalog.star_rating)
+              .fill(null)
+              .map((v, i) => (
+                <StarIcon key={i} className="text-xl sm:text-2xl" />
+              ))}
+          </Box>
+        </Box>
+      )}
       <Grid container>
-        <Grid size={{ xs: 4, md: 3 }} sx={{ textAlign: "center", paddingY: 4 }}>
-          <Image
-            src={ImgSquare}
+        <Grid
+          size={{ xs: 3, sm: 4, md: 3 }}
+          sx={{
+            textAlign: "center",
+            paddingBottom: 4,
+            paddingTop: 2,
+          }}
+        >
+          <img
+            src={contentData.catalog.hero_image_url.md}
             alt="photo"
             className="img-property"
-            priority
+            loading="lazy"
           />
         </Grid>
-        <Grid size={{ xs: 8, md: 9 }} sx={{ alignContent: "center" }}>
+        <Grid size={{ xs: 9, sm: 8, md: 9 }} sx={{ alignContent: "center" }}>
           <Box
             component={"div"}
-            className="space-y-1 sm:space-y-2 pl-2 sm:pl-0"
+            className="space-y-0 sm:space-y-2 pl-2 sm:pl-0"
           >
-            <Box
-              component={"div"}
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <Typography className="font-bold text-lg sm:text-xl ">
-                Nama Hotel
-              </Typography>
-              {/* star_rating */}
-              <Box component={"div"} sx={{ marginX: 1, color: "orange" }}>
-                <StarIcon className="text-xl sm:text-2xl" />
-                <StarIcon className="text-xl sm:text-2xl" />
-                <StarIcon className="text-xl sm:text-2xl" />
-                <StarIcon className="text-xl sm:text-2xl" />
+            {smallUP && (
+              <Box
+                component={"div"}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Typography className="font-bold text-base sm:text-xl ">
+                  {contentData.name}
+                </Typography>
+                {/* star_rating */}
+                <Box className="mx-1 text-orange-500">
+                  {new Array(contentData.catalog.star_rating)
+                    .fill(null)
+                    .map((v, i) => (
+                      <StarIcon key={i} className="text-xl sm:text-2xl" />
+                    ))}
+                </Box>
               </Box>
-            </Box>
-            <Typography className="text-gray-500 text-sm sm:text-lg">
-              Hotel
+            )}
+
+            <Typography className="text-gray-500 text-sm sm:text-lg capitalize">
+              {contentData.type}
             </Typography>
             <Typography className="text-sm sm:text-lg">
-              Jl. Rungkut Industri Raya No.4, Kutisari, Kec. Tenggilis Mejoyo,
-              Surabaya, Jawa Timur 60292
+              {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
             </Typography>
-            <Typography className="text-sm sm:text-lg">
-              review_rating . review_count
-            </Typography>
+            <div className="flex items-center space-x-2">
+              <CircularProgressbar
+                className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
+                styles={buildStyles({
+                  textSize: "40px",
+                })}
+                value={contentData.catalog.review_rating}
+                text={`${contentData.catalog.review_rating}`}
+              />
+              <Typography className="text-sm sm:text-lg">Rating .</Typography>
+              <Typography className="text-sm sm:text-lg">
+                {contentData.catalog.review_count} Reviews
+              </Typography>
+            </div>
           </Box>
         </Grid>
       </Grid>
@@ -409,100 +239,140 @@ export default function Home() {
           OR
           property : tab menu (Deals, Photos, Info)
       */}
-      <Tabs
-        value={selectedTab}
-        onChange={(e, v) => setSelectedTab(v)}
-        TabIndicatorProps={{ sx: { top: 0 } }}
-        centered
-      >
-        <Tab
-          icon={<LocalOfferIcon />}
-          iconPosition="start"
-          label="Deals"
-          {...a11yProps(0)}
-        />
-        <Tab
-          icon={<CollectionsIcon />}
-          iconPosition="start"
-          label="Photos"
-          {...a11yProps(1)}
-        />
-        <Tab
-          icon={<InfoIcon />}
-          iconPosition="start"
-          label="Info"
-          {...a11yProps(2)}
-        />
-      </Tabs>
-      <TabPanel value={selectedTab} index={0}>
-        Item One
-      </TabPanel>
-      <TabPanel value={selectedTab} index={1}>
-        {/* PHOTOS TAB */}
-        <InfiniteScroll
-          dataLength={photos.length} //This is important field to render the next data
-          next={() =>
-            setPhotos(
-              photos.concat(
-                dataImageList.slice(photos.length, photos.length + 6)
+      <TabContext value={selectedTab}>
+        <Box>
+          <TabList
+            onChange={(e, v) => setSelectedTab(v)}
+            TabIndicatorProps={{ sx: { top: 0 } }}
+            centered
+            variant={smallUP ? "standard" : "fullWidth"}
+          >
+            <Tab
+              icon={<LocalOfferIcon />}
+              iconPosition="start"
+              label="Deals"
+              value={1}
+            />
+            <Tab
+              icon={<CollectionsIcon />}
+              iconPosition="start"
+              label="Photos"
+              value={2}
+            />
+            <Tab
+              icon={<InfoIcon />}
+              iconPosition="start"
+              label="Info"
+              value={3}
+            />
+          </TabList>
+        </Box>
+        <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
+          Item One
+        </TabPanel>
+        <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
+          {/* PHOTOS TAB */}
+          <InfiniteScroll
+            dataLength={photos.length}
+            next={() =>
+              setPhotos(
+                photos.concat(
+                  contentData.image.slice(photos.length, photos.length + 9)
+                )
               )
-            )
-          }
-          hasMore={true}
-          loader={""}
-          // endMessage={
-          //   <p style={{ textAlign: "center" }}>
-          //     <b>Yay! You have seen it all</b>
-          //   </p>
-          // }
-        >
-          <div className="grid grid-cols-3 gap-1 sm:gap-4">
-            {photos.map((el, i) => (
-              <Image
-                key={i}
-                src={ImgLandscape}
-                alt={el.title}
-                className="w-full h-auto object-cover aspect-square"
-              />
-            ))}
-          </div>
-        </InfiniteScroll>
-      </TabPanel>
-      <TabPanel value={selectedTab} index={2}>
-        {/* INFO TAB: 
+            }
+            hasMore={photos.length < contentData.image.length ? true : false}
+            loader={""}
+          >
+            <div className="grid grid-cols-3 gap-1 sm:gap-4">
+              {photos.map((el, i) => (
+                <img
+                  key={i}
+                  src={el.url.md}
+                  alt={el.caption}
+                  className="w-full h-auto object-cover aspect-square"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          </InfiniteScroll>
+        </TabPanel>
+        <TabPanel value={3} sx={{ padding: 0 }} keepMounted>
+          {/* INFO TAB: 
         about (desc, language), 
         policies(check in, check out, additional information, others), 
         important information(optional charge)*/}
-        <Box component={"div"}>
-          <Typography className="text-xl font-medium">
-            About the property
-          </Typography>
-          <Typography>....</Typography>
-          <Typography className="text-lg">Languages</Typography>
-          <Typography>....</Typography>
-          <br />
-          <br />
+          <Box component={"div"}>
+            <div className="mb-2">
+              <Typography className="text-xl font-medium mb-2">
+                About the property
+              </Typography>
+              <Typography>
+                {contentData.general_info.descriptions.location}
+              </Typography>
+              <Typography>
+                {contentData.general_info.descriptions.dining}
+              </Typography>
+              <Typography>
+                {contentData.general_info.descriptions.amenities}
+              </Typography>
+            </div>
 
-          <Typography className="text-xl font-medium">Policies</Typography>
-          <Typography className="text-lg">Check in - check out</Typography>
-          <Typography>....</Typography>
-          <Typography className="text-lg">
-            Additional check-in information
-          </Typography>
-          <Typography>....</Typography>
-          <Typography className="text-lg">others</Typography>
-          <Typography>....</Typography>
-          <br />
-          <br />
+            <Typography className="text-lg">Languages</Typography>
+            <Typography>
+              {(Object.keys(language) as Array<keyof typeof language>).map(
+                (v, i) =>
+                  language[v].name +
+                  (i + 1 < Object.keys(language).length ? "," : "")
+              )}
+            </Typography>
 
-          <Typography className="text-xl font-medium">
-            Important information
-          </Typography>
-          <Typography className="text-lg">optional charges</Typography>
-          <Typography>....</Typography>
-          <br />
-        </Box>
-      </TabPanel>
+            <br />
+
+            <Typography className="text-xl font-medium mb-2">
+              Policies
+            </Typography>
+            <Typography>
+              Check in {contentData.important_info.checkin.begin_time} -{" "}
+              {contentData.important_info.checkin.end_time}
+            </Typography>
+            <Typography>
+              Check out at {contentData.important_info.checkout.time}
+            </Typography>
+
+            <Typography className="text-lg mt-2">
+              Additional check-in information
+            </Typography>
+            <div
+              className="font-sans"
+              dangerouslySetInnerHTML={{
+                __html: contentData.important_info.checkin.instructions,
+              }}
+            />
+            <Typography className="text-lg">others</Typography>
+            <div
+              className="font-sans"
+              dangerouslySetInnerHTML={{
+                __html: contentData.important_info.policies.know_before_you_go,
+              }}
+            />
+            <br />
+            <br />
+
+            <Typography className="text-xl font-medium mb-2">
+              Important information
+            </Typography>
+            <Typography className="text-lg">optional charges</Typography>
+            <div
+              className="font-sans"
+              dangerouslySetInnerHTML={{
+                __html: contentData.important_info.fees.optional,
+              }}
+            />
+            <br />
+          </Box>
+        </TabPanel>
+      </TabContext>
 
       {/* DIALOG SIGN IN */}
       <Dialog
@@ -606,6 +476,15 @@ export default function Home() {
                   type="date"
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DoorBackIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
                 />
               </Grid>
               <Grid size={{ xs: 4, sm: 2 }}>
@@ -618,6 +497,15 @@ export default function Home() {
                   type="date"
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MeetingRoomIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
                 />
               </Grid>
             </Grid>
@@ -722,13 +610,14 @@ export default function Home() {
       <Snackbar
         open={snackbarChildren}
         onClose={() => setSnackbarChildren(false)}
+        className="w-full"
       >
         <Alert
           onClose={() => setSnackbarChildren(false)}
           severity="info"
           variant="standard"
-          sx={{ width: "100%" }}
-          className="sm:mr-4"
+          // sx={{ width: "100%" }}
+          className="mr-4 sm:mr-10 w-full"
         >
           <AlertTitle>🧒 How about children ? </AlertTitle>
           Most hotels permit children to use existing bedding when sharing the
