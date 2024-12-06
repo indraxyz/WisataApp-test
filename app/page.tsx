@@ -1,9 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 
 import {
   Tab,
-  Tabs,
   Dialog,
   DialogContent,
   TextField,
@@ -18,7 +17,6 @@ import {
   Snackbar,
   Alert,
   AlertTitle,
-  CircularProgress,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Button from "@mui/material/Button";
@@ -52,16 +50,47 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import DoorBackIcon from "@mui/icons-material/DoorBack";
 
 import Logo from "../public/logo.png";
-import ImgSquare from "../public/img-square.jpg";
-// import ImgLandscape from "../public/img-landscape.png";
+// import ImgSquare from "../public/img-square.jpg";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-import { content, offer } from "../lib/mock-data";
+import { content, offers } from "../lib/mock-data";
 
 const today = new Date();
 const nextDay = new Date().setDate(today.getDate() + 1);
+
+function regroupJsonBy(jsonArray: [{}]) {
+  const grouped = {};
+
+  // Iterate over the array
+  jsonArray.forEach((item) => {
+    if (!grouped[item.room_data.id]) {
+      grouped[item.room_data.id] = [];
+    }
+
+    // Push the item into the array
+    grouped[item.room_data.id].push(item);
+  });
+
+  return grouped;
+}
+
+function remapDeals(offer: {}) {
+  let rebuild = {};
+  console.log(offer);
+
+  Object.keys(offer).forEach((v, k) => {
+    // let key = v[0];
+    // rebuild = v[0];
+    console.log(v[0]);
+  });
+
+  // Object.entries(offer).forEach((v, k) => {
+  //   rebuild[v[0]]["images"] = v[1][0].room_images;
+  // });
+  console.log(rebuild);
+}
 
 export default function Home() {
   // initial
@@ -79,15 +108,24 @@ export default function Home() {
   );
 
   // rest data
-  const [contentData, setContentData] = useState(content);
-  const [photos, setPhotos] = useState(contentData.image.slice(0, 15));
-  const [language, setLanguage] = useState(
-    contentData.general_info.spoken_languages
-  );
-  let key: keyof typeof language;
+  const [contentData, setContentData] = useState({});
+  const [photos, setPhotos] = useState([{}]);
+  const [language, setLanguage] = useState({});
+  const [deals, setDeals] = useState({});
 
   const theme = useTheme();
   const smallUP = useMediaQuery(theme.breakpoints.up("sm"));
+
+  // comp did mount
+  useEffect(() => {
+    // let resDeals = regroupJsonBy(offers.offer_list);
+    // console.log(resDeals);
+    // setDeals(resDeals);
+    remapDeals(regroupJsonBy(offers.offer_list));
+    setContentData(content);
+    setLanguage(content.general_info.spoken_languages);
+    setPhotos(content.image.slice(0, 15));
+  }, []);
 
   return (
     <Container maxWidth="lg" disableGutters className="px-2 md:px-16">
@@ -148,9 +186,10 @@ export default function Home() {
         </Grid>
       </Grid>
 
-      {/* selected place OR property
-       */}
-      {!smallUP && (
+      {/* HERO place*/}
+
+      {/* HOTEL NAME + STAR */}
+      {Object.keys(contentData).length > 0 && !smallUP && (
         <Box
           component={"div"}
           sx={{ display: "flex", alignItems: "center" }}
@@ -169,69 +208,72 @@ export default function Home() {
           </Box>
         </Box>
       )}
-      <Grid container>
-        <Grid
-          size={{ xs: 3, sm: 4, md: 3 }}
-          sx={{
-            textAlign: "center",
-            paddingBottom: 4,
-            paddingTop: 2,
-          }}
-        >
-          <img
-            src={contentData.catalog.hero_image_url.md}
-            alt="photo"
-            className="img-property"
-            loading="lazy"
-          />
-        </Grid>
-        <Grid size={{ xs: 9, sm: 8, md: 9 }} sx={{ alignContent: "center" }}>
-          <Box
-            component={"div"}
-            className="space-y-0 sm:space-y-2 pl-2 sm:pl-0"
+      {/* HERO PROPERTY */}
+      {Object.keys(contentData).length > 0 && (
+        <Grid container>
+          <Grid
+            size={{ xs: 3, sm: 4, md: 3 }}
+            sx={{
+              textAlign: "center",
+              paddingBottom: 4,
+              paddingTop: 2,
+            }}
           >
-            {smallUP && (
-              <Box
-                component={"div"}
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <Typography className="font-bold text-base sm:text-xl ">
-                  {contentData.name}
-                </Typography>
-                {/* star_rating */}
-                <Box className="mx-1 text-orange-500">
-                  {new Array(contentData.catalog.star_rating)
-                    .fill(null)
-                    .map((v, i) => (
-                      <StarIcon key={i} className="text-xl sm:text-2xl" />
-                    ))}
+            <img
+              src={contentData.catalog.hero_image_url.md}
+              alt="photo"
+              className="img-property"
+              loading="lazy"
+            />
+          </Grid>
+          <Grid size={{ xs: 9, sm: 8, md: 9 }} sx={{ alignContent: "center" }}>
+            <Box
+              component={"div"}
+              className="space-y-0 sm:space-y-2 pl-2 sm:pl-0"
+            >
+              {smallUP && (
+                <Box
+                  component={"div"}
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
+                  <Typography className="font-bold text-base sm:text-xl ">
+                    {contentData.name}
+                  </Typography>
+                  {/* star_rating */}
+                  <Box className="mx-1 text-orange-500">
+                    {new Array(contentData.catalog.star_rating)
+                      .fill(null)
+                      .map((v, i) => (
+                        <StarIcon key={i} className="text-xl sm:text-2xl" />
+                      ))}
+                  </Box>
                 </Box>
-              </Box>
-            )}
+              )}
 
-            <Typography className="text-gray-500 text-sm sm:text-lg capitalize">
-              {contentData.type}
-            </Typography>
-            <Typography className="text-sm sm:text-lg">
-              {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
-            </Typography>
-            <div className="flex items-center space-x-2">
-              <CircularProgressbar
-                className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
-                styles={buildStyles({
-                  textSize: "40px",
-                })}
-                value={contentData.catalog.review_rating}
-                text={`${contentData.catalog.review_rating}`}
-              />
-              <Typography className="text-sm sm:text-lg">Rating .</Typography>
-              <Typography className="text-sm sm:text-lg">
-                {contentData.catalog.review_count} Reviews
+              <Typography className="text-gray-500 text-sm sm:text-lg capitalize">
+                {contentData.type}
               </Typography>
-            </div>
-          </Box>
+              <Typography className="text-sm sm:text-lg">
+                {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
+              </Typography>
+              <div className="flex items-center space-x-2">
+                <CircularProgressbar
+                  className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
+                  styles={buildStyles({
+                    textSize: "40px",
+                  })}
+                  value={contentData.catalog.review_rating}
+                  text={`${contentData.catalog.review_rating}`}
+                />
+                <Typography className="text-sm sm:text-lg">Rating .</Typography>
+                <Typography className="text-sm sm:text-lg">
+                  {contentData.catalog.review_count} Reviews
+                </Typography>
+              </div>
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
       <Divider />
 
       {/* list offer 
@@ -239,140 +281,145 @@ export default function Home() {
           OR
           property : tab menu (Deals, Photos, Info)
       */}
-      <TabContext value={selectedTab}>
-        <Box>
-          <TabList
-            onChange={(e, v) => setSelectedTab(v)}
-            TabIndicatorProps={{ sx: { top: 0 } }}
-            centered
-            variant={smallUP ? "standard" : "fullWidth"}
-          >
-            <Tab
-              icon={<LocalOfferIcon />}
-              iconPosition="start"
-              label="Deals"
-              value={1}
-            />
-            <Tab
-              icon={<CollectionsIcon />}
-              iconPosition="start"
-              label="Photos"
-              value={2}
-            />
-            <Tab
-              icon={<InfoIcon />}
-              iconPosition="start"
-              label="Info"
-              value={3}
-            />
-          </TabList>
-        </Box>
-        <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
-          Item One
-        </TabPanel>
-        <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
-          {/* PHOTOS TAB */}
-          <InfiniteScroll
-            dataLength={photos.length}
-            next={() =>
-              setPhotos(
-                photos.concat(
-                  contentData.image.slice(photos.length, photos.length + 9)
+      {Object.keys(contentData).length > 0 && (
+        <TabContext value={selectedTab}>
+          <Box>
+            <TabList
+              onChange={(e, v) => setSelectedTab(v)}
+              TabIndicatorProps={{ sx: { top: 0 } }}
+              centered
+              variant={smallUP ? "standard" : "fullWidth"}
+            >
+              <Tab
+                icon={<LocalOfferIcon />}
+                iconPosition="start"
+                label="Deals"
+                value={1}
+              />
+              <Tab
+                icon={<CollectionsIcon />}
+                iconPosition="start"
+                label="Photos"
+                value={2}
+              />
+              <Tab
+                icon={<InfoIcon />}
+                iconPosition="start"
+                label="Info"
+                value={3}
+              />
+            </TabList>
+          </Box>
+          <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
+            {/* draw DEALS */}
+            {/* image */}
+          </TabPanel>
+          <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
+            {/* PHOTOS TAB */}
+            <InfiniteScroll
+              dataLength={photos.length}
+              next={() =>
+                setPhotos(
+                  photos.concat(
+                    contentData.image.slice(photos.length, photos.length + 9)
+                  )
                 )
-              )
-            }
-            hasMore={photos.length < contentData.image.length ? true : false}
-            loader={""}
-          >
-            <div className="grid grid-cols-3 gap-1 sm:gap-4">
-              {photos.map((el, i) => (
-                <img
-                  key={i}
-                  src={el.url.md}
-                  alt={el.caption}
-                  className="w-full h-auto object-cover aspect-square"
-                  loading="lazy"
-                />
-              ))}
-            </div>
-          </InfiniteScroll>
-        </TabPanel>
-        <TabPanel value={3} sx={{ padding: 0 }} keepMounted>
-          {/* INFO TAB: 
+              }
+              hasMore={photos.length < contentData.image.length ? true : false}
+              loader={""}
+            >
+              <div className="grid grid-cols-3 gap-1 sm:gap-4">
+                {Object.keys(photos[0]).length !== 0 &&
+                  photos.map((el, i) => (
+                    <img
+                      key={i}
+                      src={el.url.md}
+                      alt={el.caption}
+                      className="w-full h-auto object-cover aspect-square"
+                      loading="lazy"
+                    />
+                  ))}
+              </div>
+            </InfiniteScroll>
+          </TabPanel>
+          <TabPanel value={3} sx={{ padding: 0 }} keepMounted>
+            {/* INFO TAB: 
         about (desc, language), 
         policies(check in, check out, additional information, others), 
         important information(optional charge)*/}
-          <Box component={"div"}>
-            <div className="mb-2">
+            <Box component={"div"}>
+              <div className="mb-2">
+                <Typography className="text-xl font-medium mb-2">
+                  About the property
+                </Typography>
+                <Typography>
+                  {contentData.general_info.descriptions.location}
+                </Typography>
+                <Typography>
+                  {contentData.general_info.descriptions.dining}
+                </Typography>
+                <Typography>
+                  {contentData.general_info.descriptions.amenities}
+                </Typography>
+              </div>
+
+              <Typography className="text-lg">Languages</Typography>
+              <Typography>
+                {(Object.keys(language) as Array<keyof typeof language>).map(
+                  (v, i) =>
+                    language[v].name +
+                    (i + 1 < Object.keys(language).length ? "," : "")
+                )}
+              </Typography>
+
+              <br />
+
               <Typography className="text-xl font-medium mb-2">
-                About the property
+                Policies
               </Typography>
               <Typography>
-                {contentData.general_info.descriptions.location}
+                Check in {contentData.important_info.checkin.begin_time} -{" "}
+                {contentData.important_info.checkin.end_time}
               </Typography>
               <Typography>
-                {contentData.general_info.descriptions.dining}
+                Check out at {contentData.important_info.checkout.time}
               </Typography>
-              <Typography>
-                {contentData.general_info.descriptions.amenities}
+
+              <Typography className="text-lg mt-2">
+                Additional check-in information
               </Typography>
-            </div>
+              <div
+                className="font-sans"
+                dangerouslySetInnerHTML={{
+                  __html: contentData.important_info.checkin.instructions,
+                }}
+              />
+              <Typography className="text-lg">others</Typography>
+              <div
+                className="font-sans"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    contentData.important_info.policies.know_before_you_go,
+                }}
+              />
+              <br />
+              <br />
 
-            <Typography className="text-lg">Languages</Typography>
-            <Typography>
-              {(Object.keys(language) as Array<keyof typeof language>).map(
-                (v, i) =>
-                  language[v].name +
-                  (i + 1 < Object.keys(language).length ? "," : "")
-              )}
-            </Typography>
-
-            <br />
-
-            <Typography className="text-xl font-medium mb-2">
-              Policies
-            </Typography>
-            <Typography>
-              Check in {contentData.important_info.checkin.begin_time} -{" "}
-              {contentData.important_info.checkin.end_time}
-            </Typography>
-            <Typography>
-              Check out at {contentData.important_info.checkout.time}
-            </Typography>
-
-            <Typography className="text-lg mt-2">
-              Additional check-in information
-            </Typography>
-            <div
-              className="font-sans"
-              dangerouslySetInnerHTML={{
-                __html: contentData.important_info.checkin.instructions,
-              }}
-            />
-            <Typography className="text-lg">others</Typography>
-            <div
-              className="font-sans"
-              dangerouslySetInnerHTML={{
-                __html: contentData.important_info.policies.know_before_you_go,
-              }}
-            />
-            <br />
-            <br />
-
-            <Typography className="text-xl font-medium mb-2">
-              Important information
-            </Typography>
-            <Typography className="text-lg">optional charges</Typography>
-            <div
-              className="font-sans"
-              dangerouslySetInnerHTML={{
-                __html: contentData.important_info.fees.optional,
-              }}
-            />
-            <br />
-          </Box>
-        </TabPanel>
-      </TabContext>
+              <Typography className="text-xl font-medium mb-2">
+                Important information
+              </Typography>
+              <Typography className="text-lg">optional charges</Typography>
+              <div
+                className="font-sans"
+                dangerouslySetInnerHTML={{
+                  __html: contentData.important_info.fees.optional,
+                }}
+              />
+              <br />
+            </Box>
+          </TabPanel>
+        </TabContext>
+      )}
 
       {/* DIALOG SIGN IN */}
       <Dialog
