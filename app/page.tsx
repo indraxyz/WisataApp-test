@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import LoadingBar from "react-top-loading-bar";
 
 import {
@@ -66,7 +66,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-import { content, offers } from "../lib/mock-data";
+// import { content, offers } from "../lib/mock-data";
 
 const today = new Date();
 const nextDay = new Date().setDate(today.getDate() + 1);
