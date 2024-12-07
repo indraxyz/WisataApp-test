@@ -17,6 +17,7 @@ import {
   Snackbar,
   Alert,
   AlertTitle,
+  Chip,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Button from "@mui/material/Button";
@@ -48,9 +49,17 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import DoorBackIcon from "@mui/icons-material/DoorBack";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import NoMealsIcon from "@mui/icons-material/NoMeals";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import BedIcon from "@mui/icons-material/Bed";
+import PhotoSizeSelectSmallIcon from "@mui/icons-material/PhotoSizeSelectSmall";
+import CreditCardOffIcon from "@mui/icons-material/CreditCardOff";
+import LocationCityIcon from "@mui/icons-material/LocationCity";
+import HotelIcon from "@mui/icons-material/Hotel";
 
 import Logo from "../public/logo.png";
-// import ImgSquare from "../public/img-square.jpg";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
@@ -76,26 +85,63 @@ function regroupJsonBy(jsonArray: [{}]) {
   return grouped;
 }
 
-function remapDeals(offer: {}) {
-  let rebuild = {};
-  console.log(offer);
-
-  Object.keys(offer).forEach((v, k) => {
-    // let key = v[0];
-    // rebuild = v[0];
-    console.log(v);
-  });
-
-  // Object.entries(offer).forEach((v, k) => {
-  //   rebuild[v[0]]["images"] = v[1][0].room_images;
-  // });
-  console.log(rebuild);
-}
-
 function numberFormatIdn(number: Number) {
   let res = new Intl.NumberFormat().format(number);
   return res;
 }
+
+// REST
+async function fetchSuggest(key: String) {
+  // location
+  let fLocation = await fetch(
+    "https://project-technical-test-api.up.railway.app/location/search?query=" +
+      key
+  );
+  let dLocation = await fLocation.json();
+
+  // property
+  let fProperty = await fetch(
+    "https://project-technical-test-api.up.railway.app/property/search?query=" +
+      key
+  );
+  let dProperty = await fProperty.json();
+
+  // rebuild
+  // gabungkan result json > urutkan berdasarkan fuzzy_ratio
+  let remap = [];
+  remap = remap.concat(dLocation);
+  remap = remap.concat(dProperty);
+
+  return remap;
+}
+
+async function fetchPropertyContent(id: string) {
+  let f = await fetch(
+    `https://project-technical-test-api.up.railway.app/property/content?id=${id}&include=image&include=general_info&include=important_info&include=room`
+  );
+  return await f.json();
+}
+
+interface SearchParam {
+  id: string;
+  checkin: string;
+  checkout: string;
+  guest_per_room: number;
+  room: number;
+}
+async function fetchAvailability(p: SearchParam) {
+  console.log(p);
+  let f = await fetch(
+    `https://project-technical-test-api.up.railway.app/stay/availability/${p.id}?checkin=${p.checkin}&checkout=${p.checkout}&guest_per_room=${p.guest_per_room}&number_of_room=${p.room}&run_price_check=false`
+  );
+  return await f.json();
+}
+
+// function fetchArea(params:type) {
+
+// }
+
+let delayTimer;
 
 export default function Home() {
   // initial
@@ -111,6 +157,11 @@ export default function Home() {
   const [checkOut, setCheckOut] = useState(
     new Date(nextDay).toISOString().slice(0, 10)
   );
+  const [searchKey, setSearchKey] = useState("");
+  const [searchList, setSearchList] = useState([
+    { id: "", location_type: "", name: "empty", name_suffix: "" },
+  ]);
+  const [selectedSearch, setSelectedSearch] = useState({});
 
   // rest data
   const [contentData, setContentData] = useState({});
@@ -123,378 +174,564 @@ export default function Home() {
 
   // compDidMount
   useEffect(() => {
-    // let resDeals = regroupJsonBy(offers.offer_list);
-    console.log(regroupJsonBy(offers.offer_list));
-    setDeals(regroupJsonBy(offers.offer_list));
-    // remapDeals(regroupJsonBy(offers.offer_list));
-    setContentData(content);
-    setLanguage(content.general_info.spoken_languages);
-    setPhotos(content.image.slice(0, 15));
+    // console.log(regroupJsonBy(offers.offer_list));
+    // setDeals(regroupJsonBy(offers.offer_list));
+    // setContentData(content);
+    // setLanguage(content.general_info.spoken_languages);
+    // setPhotos(content.image.slice(0, 15));
   }, []);
 
+  const suggestSearch = (e: Object, v: String) => {
+    if (v.length > 2 && e.code != "Enter") {
+      clearTimeout(delayTimer);
+
+      delayTimer = setTimeout(async () => {
+        setSearchList(await fetchSuggest(v));
+        // console.log();
+      }, 1000);
+    } else {
+      clearTimeout(delayTimer);
+    }
+  };
+
+  const searchTrip = async () => {
+    // content PROPERTY
+    let contentProperty = await fetchPropertyContent(selectedSearch.id);
+    contentProperty = contentProperty[selectedSearch.id];
+    console.log(contentProperty);
+    setContentData(contentProperty);
+    setLanguage(contentProperty.general_info.spoken_languages);
+    setPhotos(contentProperty.image.slice(0, 15));
+    setDialogSearchBar(false);
+    // availability property
+    let contentDeals = await fetchAvailability({
+      id: selectedSearch.id,
+      checkin: checkIn,
+      checkout: checkOut,
+      guest_per_room: guestRoomField,
+      room: roomField,
+    });
+    console.log(contentDeals);
+    setDeals(regroupJsonBy(contentDeals.offer_list));
+  };
+
   return (
-    <Container maxWidth="lg" disableGutters className="px-2 md:px-16">
-      {/* top nav */}
-      <Grid container sx={{ paddingY: 1, paddingX: 0, alignItems: "center" }}>
-        <Grid
-          size={{ xs: 2, sm: 3, md: 3 }}
-          sx={{
-            textAlign: {
-              xs: "center",
-              sm: "start",
-            },
-          }}
-        >
-          {/* logo OR back */}
-          {smallUP ? (
-            <Image src={Logo} alt="WisataApp" className="logo" />
-          ) : (
-            <IconButton sx={{ padding: 0 }} disableRipple color="primary">
-              <NavigateBeforeIcon fontSize="large" />
-            </IconButton>
-          )}
-        </Grid>
-        <Grid size={{ xs: 8, sm: 7, md: 6 }} sx={{ paddingX: 0 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            sx={{ bgcolor: grey[100], color: grey[600] }}
-            onClick={() => setDialogSearchBar(true)}
-            startIcon={<SearchIcon />}
-          >
-            Choose your beautiful trip 🌈
-          </Button>
-        </Grid>
-        <Grid
-          size={{ xs: 2, sm: 2, md: 3 }}
-          sx={{
-            textAlign: {
-              xs: "center",
-              sm: "end",
-            },
-          }}
-        >
-          {smallUP ? (
-            <Button variant="contained" onClick={() => setDialogSignin(true)}>
-              Sign in
-            </Button>
-          ) : (
-            <IconButton
-              sx={{ padding: 0 }}
-              disableRipple
-              onClick={() => setDialogSignin(true)}
-              color="primary"
-            >
-              <AssignmentIndIcon fontSize="large" />
-            </IconButton>
-          )}
-        </Grid>
-      </Grid>
-
-      {/* HERO place*/}
-
-      {/* HOTEL NAME + STAR */}
-      {Object.keys(contentData).length > 0 && !smallUP && (
-        <Box
-          component={"div"}
-          sx={{ display: "flex", alignItems: "center" }}
-          className="ml-2 mt-4"
-        >
-          <Typography className="font-bold text-base sm:text-xl ">
-            {contentData.name}
-          </Typography>
-          {/* star_rating */}
-          <Box className="mx-1 text-orange-500">
-            {new Array(contentData.catalog.star_rating)
-              .fill(null)
-              .map((v, i) => (
-                <StarIcon key={i} className="text-xl sm:text-2xl" />
-              ))}
-          </Box>
-        </Box>
-      )}
-      {/* HERO PROPERTY */}
-      {Object.keys(contentData).length > 0 && (
-        <Grid container>
+    <div>
+      <Container
+        maxWidth="lg"
+        disableGutters
+        className="px-4 md:px-16 min-h-screen"
+      >
+        {/* top nav */}
+        <Grid container sx={{ paddingY: 1, paddingX: 0, alignItems: "center" }}>
           <Grid
-            size={{ xs: 3, sm: 4, md: 3 }}
+            size={{ xs: 2, sm: 3, md: 3 }}
             sx={{
-              textAlign: "center",
-              paddingBottom: 4,
-              paddingTop: 2,
+              textAlign: {
+                xs: "center",
+                sm: "start",
+              },
             }}
           >
-            <img
-              src={contentData.catalog.hero_image_url.md}
-              alt="photo"
-              className="img-property"
-              loading="lazy"
-            />
+            {/* logo OR back */}
+            {smallUP ? (
+              <Image src={Logo} alt="WisataApp" className="logo" />
+            ) : (
+              <IconButton sx={{ padding: 0 }} disableRipple color="primary">
+                <NavigateBeforeIcon fontSize="large" />
+              </IconButton>
+            )}
           </Grid>
-          <Grid size={{ xs: 9, sm: 8, md: 9 }} sx={{ alignContent: "center" }}>
-            <Box
-              component={"div"}
-              className="space-y-0 sm:space-y-2 pl-2 sm:pl-0"
+          <Grid size={{ xs: 8, sm: 7, md: 6 }} sx={{ paddingX: 0 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ bgcolor: grey[100], color: grey[600] }}
+              onClick={() => setDialogSearchBar(true)}
+              startIcon={<SearchIcon />}
+              className="text-xs sm:text-base"
             >
-              {smallUP && (
-                <Box
-                  component={"div"}
-                  sx={{ display: "flex", alignItems: "center" }}
-                >
-                  <Typography className="font-bold text-base sm:text-xl ">
-                    {contentData.name}
-                  </Typography>
-                  {/* star_rating */}
-                  <Box className="mx-1 text-orange-500">
-                    {new Array(contentData.catalog.star_rating)
-                      .fill(null)
-                      .map((v, i) => (
-                        <StarIcon key={i} className="text-xl sm:text-2xl" />
-                      ))}
-                  </Box>
-                </Box>
-              )}
-
-              <Typography className="text-gray-500 text-sm sm:text-lg capitalize">
-                {contentData.type}
-              </Typography>
-              <Typography className="text-sm sm:text-lg">
-                {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
-              </Typography>
-              <div className="flex items-center space-x-2">
-                <CircularProgressbar
-                  className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
-                  styles={buildStyles({
-                    textSize: "40px",
-                  })}
-                  value={contentData.catalog.review_rating}
-                  text={`${contentData.catalog.review_rating}`}
-                />
-                <Typography className="text-sm sm:text-lg">Rating .</Typography>
-                <Typography className="text-sm sm:text-lg">
-                  {contentData.catalog.review_count} Reviews
-                </Typography>
-              </div>
-            </Box>
+              Choose your beautiful trip 🌈
+            </Button>
+          </Grid>
+          <Grid
+            size={{ xs: 2, sm: 2, md: 3 }}
+            sx={{
+              textAlign: {
+                xs: "center",
+                sm: "end",
+              },
+            }}
+          >
+            {smallUP ? (
+              <Button variant="contained" onClick={() => setDialogSignin(true)}>
+                Sign in
+              </Button>
+            ) : (
+              <IconButton
+                sx={{ padding: 0 }}
+                disableRipple
+                onClick={() => setDialogSignin(true)}
+                color="primary"
+              >
+                <AssignmentIndIcon fontSize="large" />
+              </IconButton>
+            )}
           </Grid>
         </Grid>
-      )}
-      <Divider />
 
-      {/* list offer 
+        {Object.keys(contentData).length > 0 ? (
+          <div>
+            {/* HERO place*/}
+            {/* .... */}
+
+            {/* HOTEL NAME + STAR */}
+            {Object.keys(contentData).length > 0 && !smallUP && (
+              <Box
+                component={"div"}
+                sx={{ display: "flex", alignItems: "center" }}
+                className="ml-2 mt-4"
+              >
+                <Typography className="font-bold text-base sm:text-xl ">
+                  {contentData.name}
+                </Typography>
+                {/* star_rating */}
+                <Box className="mx-1 text-orange-500">
+                  {new Array(contentData.catalog.star_rating)
+                    .fill(null)
+                    .map((v, i) => (
+                      <StarIcon key={i} className="text-xl sm:text-2xl" />
+                    ))}
+                </Box>
+              </Box>
+            )}
+            {/* HERO PROPERTY */}
+            {Object.keys(contentData).length > 0 && (
+              <Grid container>
+                <Grid
+                  size={{ xs: 3, sm: 4, md: 3 }}
+                  sx={{
+                    textAlign: "center",
+                    paddingBottom: 4,
+                    paddingTop: 2,
+                  }}
+                >
+                  <img
+                    src={contentData.catalog.hero_image_url.md}
+                    alt="photo"
+                    className="img-property"
+                    loading="lazy"
+                  />
+                </Grid>
+                <Grid
+                  size={{ xs: 9, sm: 8, md: 9 }}
+                  sx={{ alignContent: "center" }}
+                >
+                  <Box
+                    component={"div"}
+                    className="space-y-0 sm:space-y-2 pl-2 sm:pl-0"
+                  >
+                    {smallUP && (
+                      <Box
+                        component={"div"}
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <Typography className="font-bold text-base sm:text-xl ">
+                          {contentData.name}
+                        </Typography>
+                        {/* star_rating */}
+                        <Box className="mx-1 text-orange-500">
+                          {new Array(contentData.catalog.star_rating)
+                            .fill(null)
+                            .map((v, i) => (
+                              <StarIcon
+                                key={i}
+                                className="text-xl sm:text-2xl"
+                              />
+                            ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    <Typography className="text-gray-500 text-sm sm:text-lg capitalize">
+                      {contentData.type}
+                    </Typography>
+                    <Typography className="text-sm sm:text-lg">
+                      {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
+                    </Typography>
+                    <div className="flex items-center space-x-2">
+                      <CircularProgressbar
+                        className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
+                        styles={buildStyles({
+                          textSize: "40px",
+                        })}
+                        value={contentData.catalog.review_rating}
+                        text={`${contentData.catalog.review_rating}`}
+                      />
+                      <Typography className="text-sm sm:text-lg">
+                        Rating .
+                      </Typography>
+                      <Typography className="text-sm sm:text-lg">
+                        {contentData.catalog.review_count} Reviews
+                      </Typography>
+                    </div>
+                  </Box>
+                </Grid>
+              </Grid>
+            )}
+
+            <Divider />
+
+            {/* list offer 
         	place : tab menu (stay) 
           OR
           property : tab menu (Deals, Photos, Info)
       */}
-      {Object.keys(contentData).length > 0 && (
-        <TabContext value={selectedTab}>
-          <Box>
-            <TabList
-              onChange={(e, v) => setSelectedTab(v)}
-              TabIndicatorProps={{ sx: { top: 0 } }}
-              centered
-              variant={smallUP ? "standard" : "fullWidth"}
-            >
-              <Tab
-                icon={<LocalOfferIcon />}
-                iconPosition="start"
-                label="Deals"
-                value={1}
-              />
-              <Tab
-                icon={<CollectionsIcon />}
-                iconPosition="start"
-                label="Photos"
-                value={2}
-              />
-              <Tab
-                icon={<InfoIcon />}
-                iconPosition="start"
-                label="Info"
-                value={3}
-              />
-            </TabList>
-          </Box>
-          <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
-            {/* draw DEALS */}
-            {Object.keys(deals).map((v, i) => {
-              // console.log(deals[v]);
-              // deals[v][0].room_images.map((v, i) => {
-              //   console.log(v);
-              // });
-
-              // ROOM TITTLE, image
-              return (
-                <div key={i} className="mb-6">
-                  {/* title */}
-                  <div className="mb-2">
-                    <Typography>{v}</Typography>
-                    <Typography>{deals[v][0].room_bed_groups}</Typography>
-                    <Typography>{deals[v][0].room_size_sqm}</Typography>
-                  </div>
-
-                  {/* images */}
-                  <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-2">
-                    <img
-                      className="w-full h-auto object-cover aspect-square"
-                      src={deals[v][0].room_images[0].size_sm}
-                      loading="lazy"
+            {Object.keys(contentData).length > 0 && (
+              <TabContext value={selectedTab}>
+                <Box>
+                  <TabList
+                    onChange={(e, v) => setSelectedTab(v)}
+                    TabIndicatorProps={{ sx: { top: 0 } }}
+                    centered
+                    variant={smallUP ? "standard" : "fullWidth"}
+                  >
+                    <Tab
+                      icon={<LocalOfferIcon />}
+                      iconPosition="start"
+                      label="Deals"
+                      value={1}
                     />
-                    <img
-                      className="w-full h-auto object-cover aspect-square"
-                      src={deals[v][0].room_images[1].size_sm}
-                      loading="lazy"
+                    <Tab
+                      icon={<CollectionsIcon />}
+                      iconPosition="start"
+                      label="Photos"
+                      value={2}
                     />
-                    <img
-                      className="w-full h-auto object-cover aspect-square"
-                      src={deals[v][0].room_images[2].size_sm}
-                      loading="lazy"
+                    <Tab
+                      icon={<InfoIcon />}
+                      iconPosition="start"
+                      label="Info"
+                      value={3}
                     />
-                  </div>
-                  {/* booking list */}
-                  {deals[v].map((item, i) => {
-                    return (
-                      <div key={i}>
-                        <div className="m2 my-4">
-                          {/* <Typography>{deals[v][i].offer_id}</Typography> */}
-                          <Typography>
-                            {deals[v][i].meal_plan_description == ""
-                              ? "without breakfast"
-                              : deals[v][i].meal_plan_description}
-                          </Typography>
-                          <Typography>
-                            {deals[v][i].cancel_policy_description}
-                          </Typography>
-                          <Typography>
-                            {numberFormatIdn(
-                              deals[v][i].pricing_data
-                                .net_rate_nightly_with_bonus
-                            )}
-                          </Typography>
-                          <Typography>
-                            {numberFormatIdn(
-                              deals[v][i].pricing_data
-                                .net_price_total_with_bonus
-                            )}
-                          </Typography>
+                  </TabList>
+                </Box>
+                <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
+                  {/* DEALS TAB */}
+                  {Object.keys(deals).length == 0 ? (
+                    <span>No Available Rooms</span>
+                  ) : (
+                    <>
+                      <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-4 mb-4 sm:items-center">
+                        <div className="flex">
+                          <FilterAltIcon />
+                          <Typography className="">Filter rooms</Typography>
                         </div>
-                        <Button variant="contained">Book Now</Button>
-                        <Button variant="text">see details</Button>
+                        <div className="space-x-2">
+                          <Chip
+                            className="p-2"
+                            size={smallUP ? "medium" : "small"}
+                            label="Free Breakfast"
+                            icon={<RestaurantIcon />}
+                            variant="outlined"
+                            clickable
+                            onClick={() => console.log("filter breakfast")}
+                          />
+                          <Chip
+                            className="p-2"
+                            size={smallUP ? "medium" : "small"}
+                            label="Free Cancellation"
+                            icon={<CreditScoreIcon />}
+                            variant="outlined"
+                            clickable
+                            onClick={() => console.log("filter cancellation")}
+                          />
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </TabPanel>
+                      {Object.keys(deals).map((v, i) => {
+                        // console.log(deals[v]);
+                        // deals[v][0].room_images.map((v, i) => {
+                        //   console.log(v);
+                        // });
 
-          <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
-            {/* PHOTOS TAB */}
-            <InfiniteScroll
-              dataLength={photos.length}
-              next={() =>
-                setPhotos(
-                  photos.concat(
-                    contentData.image.slice(photos.length, photos.length + 9)
-                  )
-                )
-              }
-              hasMore={photos.length < contentData.image.length ? true : false}
-              loader={""}
-            >
-              <div className="grid grid-cols-3 gap-1 sm:gap-4">
-                {Object.keys(photos[0]).length !== 0 &&
-                  photos.map((el, i) => (
-                    <img
-                      key={i}
-                      src={el.url.md}
-                      alt={el.caption}
-                      className="w-full h-auto object-cover aspect-square"
-                      loading="lazy"
+                        // ROOM TITTLE, image
+                        return (
+                          <div key={i} className="mb-6">
+                            {/* title */}
+                            <div className="mb-4 sm:mb-6">
+                              <Typography className="text-xl font-semibold">
+                                {v}
+                              </Typography>
+                              <div className="flex space-x-4">
+                                <div className="flex items-center space-x-2">
+                                  <BedIcon />
+                                  <Typography>
+                                    {deals[v][0].room_bed_groups}
+                                  </Typography>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <PhotoSizeSelectSmallIcon />
+                                  <Typography>
+                                    {deals[v][0].room_size_sqm} m<sup>2</sup>
+                                  </Typography>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* images */}
+                            <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-6">
+                              <img
+                                className="w-full h-auto object-cover aspect-square"
+                                src={deals[v][0].room_images[0].size_sm}
+                                loading="lazy"
+                              />
+                              <img
+                                className="w-full h-auto object-cover aspect-square"
+                                src={deals[v][0].room_images[1].size_sm}
+                                loading="lazy"
+                              />
+                              <img
+                                className="w-full h-auto object-cover aspect-square"
+                                src={deals[v][0].room_images[2].size_sm}
+                                loading="lazy"
+                              />
+                            </div>
+                            {/* booking list */}
+                            <div className="mt-4">
+                              <Divider />
+                              {deals[v].map((item, i) => {
+                                return (
+                                  <div key={i} className="mb-6">
+                                    <div className="pb-4">
+                                      <div className="my-4 space-y-1 sm:space-y-2">
+                                        <div className="space-y-1 sm:space-y-2">
+                                          {deals[v][i].meal_plan_code ==
+                                          "RO" ? (
+                                            <div className="flex items-center space-x-2">
+                                              <NoMealsIcon />
+                                              <Typography>
+                                                without breakfast
+                                              </Typography>
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center space-x-2 text-green-600">
+                                              <RestaurantIcon />
+                                              <Typography>
+                                                {
+                                                  deals[v][i]
+                                                    .meal_plan_description
+                                                }
+                                              </Typography>
+                                            </div>
+                                          )}
+
+                                          {deals[v][i].cancel_policy_code ==
+                                          "NR" ? (
+                                            <div className="flex items-center space-x-2 text-red-600">
+                                              <CreditCardOffIcon />
+                                              <Typography>
+                                                {
+                                                  deals[v][i]
+                                                    .cancel_policy_description
+                                                }
+                                              </Typography>
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center space-x-2 text-green-600">
+                                              <CreditScoreIcon />
+                                              <Typography>
+                                                {
+                                                  deals[v][i]
+                                                    .cancel_policy_description
+                                                }
+                                              </Typography>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <div className="space-y-1">
+                                          <div className="flex items-center">
+                                            <Typography className="text-lg font-medium">
+                                              {numberFormatIdn(
+                                                deals[v][i].pricing_data
+                                                  .net_rate_nightly_with_bonus
+                                              )}
+                                            </Typography>
+                                            <Typography className="text-sm ml-2">
+                                              /night*
+                                            </Typography>
+                                          </div>
+                                          <Typography className="text-sm text-gray-400">
+                                            after tax & fees
+                                          </Typography>
+                                          <Typography className="text-sm text-gray-400 pt-2">
+                                            * Member-only price, valid in app
+                                            only
+                                          </Typography>
+                                        </div>
+                                      </div>
+                                      <div className="space-x-4">
+                                        <Button variant="contained">
+                                          Book Now
+                                        </Button>
+                                        <Button variant="text">
+                                          see details
+                                        </Button>
+                                      </div>
+                                      <div className="flex items-center space-x-1 text-blue-500 mt-2">
+                                        <StarIcon className="text-sm" />
+                                        <Typography className="text-sm">
+                                          Collect 3 points
+                                        </Typography>
+                                      </div>
+                                    </div>
+                                    <Divider />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                  {/* filter */}
+                </TabPanel>
+
+                <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
+                  {/* PHOTOS TAB */}
+                  <InfiniteScroll
+                    dataLength={photos.length}
+                    next={() =>
+                      setPhotos(
+                        photos.concat(
+                          contentData.image.slice(
+                            photos.length,
+                            photos.length + 9
+                          )
+                        )
+                      )
+                    }
+                    hasMore={
+                      photos.length < contentData.image.length ? true : false
+                    }
+                    loader={""}
+                  >
+                    <div className="grid grid-cols-3 gap-1 sm:gap-4">
+                      {Object.keys(photos[0]).length !== 0 &&
+                        photos.map((el, i) => (
+                          <img
+                            key={i}
+                            src={el.url.md}
+                            alt={el.caption}
+                            className="w-full h-auto object-cover aspect-square"
+                            loading="lazy"
+                          />
+                        ))}
+                    </div>
+                  </InfiniteScroll>
+                </TabPanel>
+
+                <TabPanel value={3} sx={{ padding: 0 }} keepMounted>
+                  {/* INFO TAB */}
+                  <Box component={"div"}>
+                    <div className="mb-2">
+                      <Typography className="text-xl font-medium mb-2">
+                        About the property
+                      </Typography>
+                      <Typography>
+                        {contentData.general_info.descriptions.location}
+                      </Typography>
+                      <Typography>
+                        {contentData.general_info.descriptions.dining}
+                      </Typography>
+                      <Typography>
+                        {contentData.general_info.descriptions.amenities}
+                      </Typography>
+                    </div>
+
+                    <Typography className="text-lg">Languages</Typography>
+                    <Typography>
+                      {(
+                        Object.keys(language) as Array<keyof typeof language>
+                      ).map(
+                        (v, i) =>
+                          language[v].name +
+                          (i + 1 < Object.keys(language).length ? "," : "")
+                      )}
+                    </Typography>
+
+                    <br />
+
+                    <Typography className="text-xl font-medium mb-2">
+                      Policies
+                    </Typography>
+                    <Typography>
+                      Check in {contentData.important_info.checkin.begin_time} -{" "}
+                      {contentData.important_info.checkin.end_time}
+                    </Typography>
+                    <Typography>
+                      Check out at {contentData.important_info.checkout.time}
+                    </Typography>
+
+                    <Typography className="text-lg mt-2">
+                      Additional check-in information
+                    </Typography>
+                    <div
+                      className="font-sans"
+                      dangerouslySetInnerHTML={{
+                        __html: contentData.important_info.checkin.instructions,
+                      }}
                     />
-                  ))}
-              </div>
-            </InfiniteScroll>
-          </TabPanel>
-          <TabPanel value={3} sx={{ padding: 0 }} keepMounted>
-            {/* INFO TAB: 
-        about (desc, language), 
-        policies(check in, check out, additional information, others), 
-        important information(optional charge)*/}
-            <Box component={"div"}>
-              <div className="mb-2">
-                <Typography className="text-xl font-medium mb-2">
-                  About the property
-                </Typography>
-                <Typography>
-                  {contentData.general_info.descriptions.location}
-                </Typography>
-                <Typography>
-                  {contentData.general_info.descriptions.dining}
-                </Typography>
-                <Typography>
-                  {contentData.general_info.descriptions.amenities}
-                </Typography>
-              </div>
+                    <Typography className="text-lg">others</Typography>
+                    <div
+                      className="font-sans"
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          contentData.important_info.policies
+                            .know_before_you_go,
+                      }}
+                    />
+                    <br />
+                    <br />
 
-              <Typography className="text-lg">Languages</Typography>
-              <Typography>
-                {(Object.keys(language) as Array<keyof typeof language>).map(
-                  (v, i) =>
-                    language[v].name +
-                    (i + 1 < Object.keys(language).length ? "," : "")
-                )}
-              </Typography>
+                    <Typography className="text-xl font-medium mb-2">
+                      Important information
+                    </Typography>
+                    <Typography className="text-lg">
+                      optional charges
+                    </Typography>
+                    <div
+                      className="font-sans"
+                      dangerouslySetInnerHTML={{
+                        __html: contentData.important_info.fees.optional,
+                      }}
+                    />
+                    <br />
+                  </Box>
+                </TabPanel>
+              </TabContext>
+            )}
+          </div>
+        ) : (
+          <div className="text-center min-h-screen content-center">
+            <Typography>Lets start your trip here 😊</Typography>
+          </div>
+        )}
+      </Container>
+      {/* FOOTER */}
+      <div className="bg-gray-100 px-4 py-8 flex justify-between">
+        <div className="flex space-x-3 items-center ">
+          <Typography className="text-base">© Wisata App</Typography>
+          <span>|</span>
+          <a href="#" className="text-black">
+            Terms
+          </a>
+        </div>
+        <div className="justify-end">v4.10</div>
+      </div>
 
-              <br />
-
-              <Typography className="text-xl font-medium mb-2">
-                Policies
-              </Typography>
-              <Typography>
-                Check in {contentData.important_info.checkin.begin_time} -{" "}
-                {contentData.important_info.checkin.end_time}
-              </Typography>
-              <Typography>
-                Check out at {contentData.important_info.checkout.time}
-              </Typography>
-
-              <Typography className="text-lg mt-2">
-                Additional check-in information
-              </Typography>
-              <div
-                className="font-sans"
-                dangerouslySetInnerHTML={{
-                  __html: contentData.important_info.checkin.instructions,
-                }}
-              />
-              <Typography className="text-lg">others</Typography>
-              <div
-                className="font-sans"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    contentData.important_info.policies.know_before_you_go,
-                }}
-              />
-              <br />
-              <br />
-
-              <Typography className="text-xl font-medium mb-2">
-                Important information
-              </Typography>
-              <Typography className="text-lg">optional charges</Typography>
-              <div
-                className="font-sans"
-                dangerouslySetInnerHTML={{
-                  __html: contentData.important_info.fees.optional,
-                }}
-              />
-              <br />
-            </Box>
-          </TabPanel>
-        </TabContext>
-      )}
-
+      {/* ALERT/DIALOG */}
       {/* DIALOG SIGN IN */}
       <Dialog
         maxWidth="xs"
@@ -558,7 +795,7 @@ export default function Home() {
             <Grid size={{ xs: 4 }}>
               <Autocomplete
                 className="w-full"
-                freeSolo
+                // freeSolo
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -577,11 +814,70 @@ export default function Home() {
                     }}
                   />
                 )}
-                value={""}
-                options={[]}
-                // onKeyUp={suggestSearch}
-                // onKeyDown={enterSearch}
-                // onInputChange={(e, v) => console.log("")}
+                // value={searchKey}
+                options={searchList}
+                onKeyUp={(e) => {
+                  setSearchKey(e.target.value);
+                  suggestSearch(e, e.target.value);
+                }}
+                onChange={(e, v) => {
+                  console.log(v);
+                  setSelectedSearch(v);
+                }}
+                getOptionLabel={(option) => option.name}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+
+                  return (
+                    <div key={option.id}>
+                      {option.id !== "" ? (
+                        <Box
+                          component="li"
+                          {...optionProps}
+                          className="h-15 px-1 pb-2"
+                        >
+                          <div className="flex space-x-2">
+                            {{
+                              property: (
+                                <div className="flex items-center space-x-2">
+                                  <HotelIcon className="text-blue-600" />
+                                  <Typography className="text-sm">
+                                    HOTEL
+                                  </Typography>
+                                </div>
+                              ),
+                              city: (
+                                <div className="flex items-center space-x-2">
+                                  <LocationCityIcon className="text-green-600" />
+                                  <Typography className="text-sm">
+                                    CITY
+                                  </Typography>
+                                </div>
+                              ),
+                            }[option.location_type] || (
+                              <div className="flex items-center space-x-2">
+                                <LocationOnIcon className="text-green-600" />
+                                <Typography className="text-sm">
+                                  AREA
+                                </Typography>
+                              </div>
+                            )}
+                          </div>
+                          <Typography className="font-medium">
+                            {option.name}
+                          </Typography>
+                          <Typography className="text-sm text-gray-400">
+                            {option.name_suffix}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Typography className="text-sm text-gray-400 ml-2">
+                          Empty
+                        </Typography>
+                      )}
+                    </div>
+                  );
+                }}
                 // onChange={() => console.log()}
               />
             </Grid>
@@ -719,7 +1015,12 @@ export default function Home() {
             </Grid>
             {/* submit */}
             <Grid size={{ xs: 4 }}>
-              <Button fullWidth variant="contained" startIcon={<SearchIcon />}>
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<SearchIcon />}
+                onClick={() => searchTrip()}
+              >
                 Search
               </Button>
             </Grid>
@@ -746,6 +1047,6 @@ export default function Home() {
           hotel occupancy policy.
         </Alert>
       </Snackbar>
-    </Container>
+    </div>
   );
 }
