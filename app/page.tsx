@@ -65,12 +65,12 @@ function regroupJsonBy(jsonArray: [{}]) {
 
   // Iterate over the array
   jsonArray.forEach((item) => {
-    if (!grouped[item.room_data.id]) {
-      grouped[item.room_data.id] = [];
+    if (!grouped[item.room_name]) {
+      grouped[item.room_name] = [];
     }
 
     // Push the item into the array
-    grouped[item.room_data.id].push(item);
+    grouped[item.room_name].push(item);
   });
 
   return grouped;
@@ -83,13 +83,18 @@ function remapDeals(offer: {}) {
   Object.keys(offer).forEach((v, k) => {
     // let key = v[0];
     // rebuild = v[0];
-    console.log(v[0]);
+    console.log(v);
   });
 
   // Object.entries(offer).forEach((v, k) => {
   //   rebuild[v[0]]["images"] = v[1][0].room_images;
   // });
   console.log(rebuild);
+}
+
+function numberFormatIdn(number: Number) {
+  let res = new Intl.NumberFormat().format(number);
+  return res;
 }
 
 export default function Home() {
@@ -116,12 +121,12 @@ export default function Home() {
   const theme = useTheme();
   const smallUP = useMediaQuery(theme.breakpoints.up("sm"));
 
-  // comp did mount
+  // compDidMount
   useEffect(() => {
     // let resDeals = regroupJsonBy(offers.offer_list);
-    // console.log(resDeals);
-    // setDeals(resDeals);
-    remapDeals(regroupJsonBy(offers.offer_list));
+    console.log(regroupJsonBy(offers.offer_list));
+    setDeals(regroupJsonBy(offers.offer_list));
+    // remapDeals(regroupJsonBy(offers.offer_list));
     setContentData(content);
     setLanguage(content.general_info.spoken_languages);
     setPhotos(content.image.slice(0, 15));
@@ -312,8 +317,77 @@ export default function Home() {
           </Box>
           <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
             {/* draw DEALS */}
-            {/* image */}
+            {Object.keys(deals).map((v, i) => {
+              // console.log(deals[v]);
+              // deals[v][0].room_images.map((v, i) => {
+              //   console.log(v);
+              // });
+
+              // ROOM TITTLE, image
+              return (
+                <div key={i} className="mb-6">
+                  {/* title */}
+                  <div className="mb-2">
+                    <Typography>{v}</Typography>
+                    <Typography>{deals[v][0].room_bed_groups}</Typography>
+                    <Typography>{deals[v][0].room_size_sqm}</Typography>
+                  </div>
+
+                  {/* images */}
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-2">
+                    <img
+                      className="w-full h-auto object-cover aspect-square"
+                      src={deals[v][0].room_images[0].size_sm}
+                      loading="lazy"
+                    />
+                    <img
+                      className="w-full h-auto object-cover aspect-square"
+                      src={deals[v][0].room_images[1].size_sm}
+                      loading="lazy"
+                    />
+                    <img
+                      className="w-full h-auto object-cover aspect-square"
+                      src={deals[v][0].room_images[2].size_sm}
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* booking list */}
+                  {deals[v].map((item, i) => {
+                    return (
+                      <div key={i}>
+                        <div className="m2 my-4">
+                          {/* <Typography>{deals[v][i].offer_id}</Typography> */}
+                          <Typography>
+                            {deals[v][i].meal_plan_description == ""
+                              ? "without breakfast"
+                              : deals[v][i].meal_plan_description}
+                          </Typography>
+                          <Typography>
+                            {deals[v][i].cancel_policy_description}
+                          </Typography>
+                          <Typography>
+                            {numberFormatIdn(
+                              deals[v][i].pricing_data
+                                .net_rate_nightly_with_bonus
+                            )}
+                          </Typography>
+                          <Typography>
+                            {numberFormatIdn(
+                              deals[v][i].pricing_data
+                                .net_price_total_with_bonus
+                            )}
+                          </Typography>
+                        </div>
+                        <Button variant="contained">Book Now</Button>
+                        <Button variant="text">see details</Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
           </TabPanel>
+
           <TabPanel value={2} sx={{ padding: 0 }} keepMounted>
             {/* PHOTOS TAB */}
             <InfiniteScroll
