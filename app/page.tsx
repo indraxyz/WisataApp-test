@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useLayoutEffect } from "react";
+import LoadingBar from "react-top-loading-bar";
 
 import {
   Tab,
@@ -58,6 +59,7 @@ import PhotoSizeSelectSmallIcon from "@mui/icons-material/PhotoSizeSelectSmall";
 import CreditCardOffIcon from "@mui/icons-material/CreditCardOff";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import HotelIcon from "@mui/icons-material/Hotel";
+import TodayIcon from "@mui/icons-material/Today";
 
 import Logo from "../public/logo.png";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -144,6 +146,8 @@ async function fetchAvailability(p: SearchParam) {
 let delayTimer;
 
 export default function Home() {
+  // loading
+  const [progress, setProgress] = useState(0);
   // initial
   const [dialogSignin, setDialogSignin] = useState(false);
   const [dialogSearchBar, setDialogSearchBar] = useState(false);
@@ -151,6 +155,7 @@ export default function Home() {
   const [snackbarChildren, setSnackbarChildren] = useState(false);
 
   // form search bar
+  const [tittleSearch, setTittleSearch] = useState("");
   const [guestRoomField, setGuestRoomField] = useState(1);
   const [roomField, setRoomField] = useState(1);
   const [checkIn, setCheckIn] = useState(today.toISOString().slice(0, 10));
@@ -195,6 +200,7 @@ export default function Home() {
   };
 
   const searchTrip = async () => {
+    setProgress(50);
     // content PROPERTY
     let contentProperty = await fetchPropertyContent(selectedSearch.id);
     contentProperty = contentProperty[selectedSearch.id];
@@ -213,10 +219,20 @@ export default function Home() {
     });
     console.log(contentDeals);
     setDeals(regroupJsonBy(contentDeals.offer_list));
+
+    // tittle search
+    setTittleSearch(selectedSearch.name);
+
+    setProgress(100);
   };
 
   return (
     <div>
+      <LoadingBar
+        color="#0D92F4"
+        progress={progress}
+        onLoaderFinished={() => setProgress(0)}
+      />
       <Container
         maxWidth="lg"
         disableGutters
@@ -251,7 +267,9 @@ export default function Home() {
               startIcon={<SearchIcon />}
               className="text-xs sm:text-base"
             >
-              Choose your beautiful trip 🌈
+              {tittleSearch == ""
+                ? "Choose your beautiful trip 🌈"
+                : tittleSearch}
             </Button>
           </Grid>
           <Grid
@@ -341,7 +359,9 @@ export default function Home() {
                         </Typography>
                         {/* star_rating */}
                         <Box className="mx-1 text-orange-500">
-                          {new Array(contentData.catalog.star_rating)
+                          {new Array(
+                            Math.floor(contentData.catalog.star_rating)
+                          )
                             .fill(null)
                             .map((v, i) => (
                               <StarIcon
@@ -359,22 +379,24 @@ export default function Home() {
                     <Typography className="text-sm sm:text-lg">
                       {`${contentData.address_line}, ${contentData.name_suffix} ${contentData.catalog.postal_code}`}
                     </Typography>
-                    <div className="flex items-center space-x-2">
-                      <CircularProgressbar
-                        className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
-                        styles={buildStyles({
-                          textSize: "40px",
-                        })}
-                        value={contentData.catalog.review_rating}
-                        text={`${contentData.catalog.review_rating}`}
-                      />
-                      <Typography className="text-sm sm:text-lg">
-                        Rating .
-                      </Typography>
-                      <Typography className="text-sm sm:text-lg">
-                        {contentData.catalog.review_count} Reviews
-                      </Typography>
-                    </div>
+                    {contentData.catalog.hasOwnProperty("review_rating") && (
+                      <div className="flex items-center space-x-2">
+                        <CircularProgressbar
+                          className="font-bold !w-8 sm:!w-10 h-10 flex-initial"
+                          styles={buildStyles({
+                            textSize: "40px",
+                          })}
+                          value={contentData.catalog.review_rating}
+                          text={`${contentData.catalog.review_rating}`}
+                        />
+                        <Typography className="text-sm sm:text-lg">
+                          Rating .
+                        </Typography>
+                        <Typography className="text-sm sm:text-lg">
+                          {contentData.catalog.review_count} Reviews
+                        </Typography>
+                      </div>
+                    )}
                   </Box>
                 </Grid>
               </Grid>
@@ -419,7 +441,7 @@ export default function Home() {
                 <TabPanel value={1} sx={{ padding: 0 }} keepMounted>
                   {/* DEALS TAB */}
                   {Object.keys(deals).length == 0 ? (
-                    <span>No Available Rooms</span>
+                    <Typography>No Available Rooms</Typography>
                   ) : (
                     <>
                       <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-4 mb-4 sm:items-center">
@@ -448,6 +470,26 @@ export default function Home() {
                           />
                         </div>
                       </div>
+
+                      <div className="flex space-x-2 mb-2">
+                        <TodayIcon />
+                        <Typography>
+                          {new Date(checkIn).toLocaleDateString("id-ID", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Typography>
+                        <span>-</span>
+                        <Typography>
+                          {new Date(checkOut).toLocaleDateString("id-ID", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Typography>
+                      </div>
+
                       {Object.keys(deals).map((v, i) => {
                         // console.log(deals[v]);
                         // deals[v][0].room_images.map((v, i) => {

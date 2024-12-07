@@ -20,7 +20,8 @@
     "react": "latest",
     "react-circular-progressbar": "^2.1.0",
     "react-dom": "latest",
-    "react-infinite-scroll-component": "latest"
+    "react-infinite-scroll-component": "latest",
+    "react-top-loading-bar": "^2.3.1"
   },
   "devDependencies": {
     "@types/node": "latest",
