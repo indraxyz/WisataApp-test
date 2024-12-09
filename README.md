@@ -37,17 +37,17 @@ WisataApp, main focus on search property, hetels detail, available rooms. (respo
 
 ## views
 
-Welcome <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/welcome.png">
-Signin <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/signin.png">
-Search Hotels <br>
+<br> Welcome
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/welcome.png"> <br>
+<br> Signin <br>
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/signin.png"> <br>
+<br> Search Hotels <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/search-hotels.png">
-Suggest Hotels <br>
+<br> Suggest Hotels <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/suggest-hotels.png">
-Available Rooms <br>
+<br> Available Rooms <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/available-rooms.png">
-Photos Tab <br>
+<br> Photos Tab <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/photos-tab.png">
-Info Tab <br>
+<br> Info Tab <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/info-tab.png">
