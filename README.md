@@ -37,6 +37,8 @@ WisataApp, main focus on search property, hotels detail, available rooms using t
 
 ## views
 
+https://github.com/user-attachments/assets/79d582a0-b05b-42bf-a31f-78383070f6aa
+
 Welcome <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/welcome.png"> <br>
 <br> Signin <br>
