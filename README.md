@@ -47,6 +47,7 @@ Welcome <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/suggest-hotels.png"> <br>
 <br> Available Rooms <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/available-rooms.png"> <br>
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/available-rooms-2.png"> <br>
 <br> Photos Tab <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/photos-tab.png"> <br>
 <br> Info Tab <br>
