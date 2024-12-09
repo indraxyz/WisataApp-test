@@ -37,17 +37,17 @@ WisataApp, main focus on search property, hetels detail, available rooms. (respo
 
 ## views
 
-<br> Welcome
+Welcome <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/welcome.png"> <br>
 <br> Signin <br>
 <img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/signin.png"> <br>
 <br> Search Hotels <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/search-hotels.png">
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/search-hotels.png"> <br>
 <br> Suggest Hotels <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/suggest-hotels.png">
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/suggest-hotels.png"> <br>
 <br> Available Rooms <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/available-rooms.png">
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/available-rooms.png"> <br>
 <br> Photos Tab <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/photos-tab.png">
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/photos-tab.png"> <br>
 <br> Info Tab <br>
-<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/info-tab.png">
+<img src="https://github.com/indraxyz/wisataApp-test/blob/main/public/info-tab.png"> <br>
