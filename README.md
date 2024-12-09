@@ -1,6 +1,6 @@
 # About
 
-WisataApp, main focus on search property, hetels detail, available rooms. (responsive ui, rest api only)
+WisataApp, main focus on search property, hotels detail, available rooms using typescript, nextjs, materialui, tailwind
 
 ## Features
 
