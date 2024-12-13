@@ -87,7 +87,7 @@ function regroupJsonBy(jsonArray: [{}]) {
   return grouped;
 }
 
-function numberFormatIdn(number: Number) {
+function numberFormatIdn(number: number) {
   let res = new Intl.NumberFormat().format(number);
   return res;
 }
