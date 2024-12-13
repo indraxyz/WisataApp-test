@@ -858,10 +858,13 @@ export default function Home() {
                 )}
                 // value={searchKey}
                 options={searchList}
-                onKeyUp={(e) => {
-                  setSearchKey(e.target.value);
-                  suggestSearch(e, e.target.value);
+                onInputChange={(e, v) => {
+                  setSearchKey(v);
+                  suggestSearch(e, v);
                 }}
+                onKeyDown={(e) =>
+                  e.code == "Enter" && console.log("direct search " + searchKey)
+                }
                 onChange={(e, v) => {
                   console.log(v);
                   setSelectedSearch(v);
